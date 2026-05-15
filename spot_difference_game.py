@@ -30,6 +30,40 @@ from PIL import Image, ImageTk
 
 # ----------------------------- Data Classes -----------------------------
 
+@dataclass
+class DifferenceRegion:
+    """Stores the position and status of a generated difference."""
+    x: int
+    y: int
+    w: int
+    h: int
+    alteration_type: str
+    found: bool = False
+    revealed: bool = False
+
+    @property
+    def center(self):
+        return self.x + self.w // 2, self.y + self.h // 2
+
+    @property
+    def radius(self):
+        return max(self.w, self.h) // 2 + 8
+
+    def contains_click(self, click_x: int, click_y: int, tolerance: int = 15) -> bool:
+        """Checks whether a click is close enough to this difference region."""
+        return (
+            self.x - tolerance <= click_x <= self.x + self.w + tolerance
+            and self.y - tolerance <= click_y <= self.y + self.h + tolerance
+        )
+
+    def overlaps(self, other: "DifferenceRegion", padding: int = 20) -> bool:
+        """Checks whether this region overlaps another region, including padding."""
+        return not (
+            self.x + self.w + padding < other.x
+            or other.x + other.w + padding < self.x
+            or self.y + self.h + padding < other.y
+            or other.y + other.h + padding < self.y
+        )
 
 
 
